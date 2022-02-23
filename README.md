@@ -26,4 +26,4 @@ while not done:
     env.render()
 ```
 
-![](https://raw.githubusercontent.com/qgallouedec/gym-continuous-maze/main/images/demo.gif)
+![](https://raw.githubusercontent.com/qgallouedec/gym-continuous-maze/main/images/demo.png)
