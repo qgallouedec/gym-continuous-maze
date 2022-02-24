@@ -4,6 +4,7 @@ import gym
 import numpy as np
 import pygame
 from gym import spaces
+from pygame import gfxdraw
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -36,97 +37,94 @@ def get_intersect(A: np.ndarray, B: np.ndarray, C: np.ndarray, D: np.ndarray) ->
             return np.array([xi, yi])
 
 
-def to_pix(X: np.ndarray) -> np.ndarray:
-    """
-    Convert position to pixel position in the screen.
-    """
-    return X * np.array([1, -1]) * 20 + 250
-
-
 class ContinuousMaze(gym.Env):
     """Continuous maze environment."""
 
     action_space = spaces.Box(-1, 1, (2,))
     observation_space = spaces.Box(-10, 10, (2,))
 
-    walls = [
-        [[-12, -12], [-12, 12]],
-        [[-10, 8], [-10, 10]],
-        [[-10, 0], [-10, 6]],
-        [[-10, -4], [-10, -2]],
-        [[-10, -10], [-10, -6]],
-        [[-8, 4], [-8, 8]],
-        [[-8, -4], [-8, 0]],
-        [[-8, -8], [-8, -6]],
-        [[-6, 8], [-6, 10]],
-        [[-6, 4], [-6, 6]],
-        [[-6, 0], [-6, 2]],
-        [[-6, -6], [-6, -4]],
-        [[-4, 2], [-4, 8]],
-        [[-4, -2], [-4, 0]],
-        [[-4, -10], [-4, -6]],
-        [[-2, 8], [-2, 12]],
-        [[-2, 2], [-2, 6]],
-        [[-2, -4], [-2, -2]],
-        [[0, 6], [0, 12]],
-        [[0, 2], [0, 4]],
-        [[0, -8], [0, -6]],
-        [[2, 8], [2, 10]],
-        [[2, -8], [2, 6]],
-        [[4, 10], [4, 12]],
-        [[4, 4], [4, 6]],
-        [[4, 0], [4, 2]],
-        [[4, -6], [4, -2]],
-        [[4, -10], [4, -8]],
-        [[6, 10], [6, 12]],
-        [[6, 6], [6, 8]],
-        [[6, 0], [6, 2]],
-        [[6, -8], [6, -6]],
-        [[8, 10], [8, 12]],
-        [[8, 4], [8, 6]],
-        [[8, -4], [8, 2]],
-        [[8, -10], [8, -8]],
-        [[10, 10], [10, 12]],
-        [[10, 4], [10, 8]],
-        [[10, -2], [10, 0]],
-        [[12, -12], [12, 12]],
-        [[-12, 12], [12, 12]],
-        [[-12, 10], [-10, 10]],
-        [[-8, 10], [-6, 10]],
-        [[-4, 10], [-2, 10]],
-        [[2, 10], [4, 10]],
-        [[-8, 8], [-2, 8]],
-        [[2, 8], [8, 8]],
-        [[-10, 6], [-8, 6]],
-        [[-6, 6], [-2, 6]],
-        [[6, 6], [8, 6]],
-        [[0, 4], [6, 4]],
-        [[-10, 2], [-6, 2]],
-        [[-2, 2], [0, 2]],
-        [[8, 2], [10, 2]],
-        [[-4, 0], [-2, 0]],
-        [[2, 0], [4, 0]],
-        [[6, 0], [8, 0]],
-        [[-6, -2], [2, -2]],
-        [[4, -2], [10, -2]],
-        [[-12, -4], [-8, -4]],
-        [[-4, -4], [-2, -4]],
-        [[0, -4], [6, -4]],
-        [[8, -4], [10, -4]],
-        [[-8, -6], [-6, -6]],
-        [[-2, -6], [0, -6]],
-        [[6, -6], [10, -6]],
-        [[-12, -8], [-6, -8]],
-        [[-2, -8], [2, -8]],
-        [[4, -8], [6, -8]],
-        [[8, -8], [10, -8]],
-        [[-10, -10], [-8, -10]],
-        [[-4, -10], [4, -10]],
-        [[-12, -12], [12, -12]],
-    ]
+    walls = np.array(
+        [
+            [[-12.0, -12.0], [-12.0, 12.0]],
+            [[-10.0, 8.0], [-10.0, 10.0]],
+            [[-10.0, 0.0], [-10.0, 6.0]],
+            [[-10.0, -4.0], [-10.0, -2.0]],
+            [[-10.0, -10.0], [-10.0, -6.0]],
+            [[-8.0, 4.0], [-8.0, 8.0]],
+            [[-8.0, -4.0], [-8.0, 0.0]],
+            [[-8.0, -8.0], [-8.0, -6.0]],
+            [[-6.0, 8.0], [-6.0, 10.0]],
+            [[-6.0, 4.0], [-6.0, 6.0]],
+            [[-6.0, 0.0], [-6.0, 2.0]],
+            [[-6.0, -6.0], [-6.0, -4.0]],
+            [[-4.0, 2.0], [-4.0, 8.0]],
+            [[-4.0, -2.0], [-4.0, 0.0]],
+            [[-4.0, -10.0], [-4.0, -6.0]],
+            [[-2.0, 8.0], [-2.0, 12.0]],
+            [[-2.0, 2.0], [-2.0, 6.0]],
+            [[-2.0, -4.0], [-2.0, -2.0]],
+            [[0.0, 6.0], [0.0, 12.0]],
+            [[0.0, 2.0], [0.0, 4.0]],
+            [[0.0, -8.0], [0.0, -6.0]],
+            [[2.0, 8.0], [2.0, 10.0]],
+            [[2.0, -8.0], [2.0, 6.0]],
+            [[4.0, 10.0], [4.0, 12.0]],
+            [[4.0, 4.0], [4.0, 6.0]],
+            [[4.0, 0.0], [4.0, 2.0]],
+            [[4.0, -6.0], [4.0, -2.0]],
+            [[4.0, -10.0], [4.0, -8.0]],
+            [[6.0, 10.0], [6.0, 12.0]],
+            [[6.0, 6.0], [6.0, 8.0]],
+            [[6.0, 0.0], [6.0, 2.0]],
+            [[6.0, -8.0], [6.0, -6.0]],
+            [[8.0, 10.0], [8.0, 12.0]],
+            [[8.0, 4.0], [8.0, 6.0]],
+            [[8.0, -4.0], [8.0, 2.0]],
+            [[8.0, -10.0], [8.0, -8.0]],
+            [[10.0, 10.0], [10.0, 12.0]],
+            [[10.0, 4.0], [10.0, 8.0]],
+            [[10.0, -2.0], [10.0, 0.0]],
+            [[12.0, -12.0], [12.0, 12.0]],
+            [[-12.0, 12.0], [12.0, 12.0]],
+            [[-12.0, 10.0], [-10.0, 10.0]],
+            [[-8.0, 10.0], [-6.0, 10.0]],
+            [[-4.0, 10.0], [-2.0, 10.0]],
+            [[2.0, 10.0], [4.0, 10.0]],
+            [[-8.0, 8.0], [-2.0, 8.0]],
+            [[2.0, 8.0], [8.0, 8.0]],
+            [[-10.0, 6.0], [-8.0, 6.0]],
+            [[-6.0, 6.0], [-2.0, 6.0]],
+            [[6.0, 6.0], [8.0, 6.0]],
+            [[0.0, 4.0], [6.0, 4.0]],
+            [[-10.0, 2.0], [-6.0, 2.0]],
+            [[-2.0, 2.0], [0.0, 2.0]],
+            [[8.0, 2.0], [10.0, 2.0]],
+            [[-4.0, 0.0], [-2.0, 0.0]],
+            [[2.0, 0.0], [4.0, 0.0]],
+            [[6.0, 0.0], [8.0, 0.0]],
+            [[-6.0, -2.0], [2.0, -2.0]],
+            [[4.0, -2.0], [10.0, -2.0]],
+            [[-12.0, -4.0], [-8.0, -4.0]],
+            [[-4.0, -4.0], [-2.0, -4.0]],
+            [[0.0, -4.0], [6.0, -4.0]],
+            [[8.0, -4.0], [10.0, -4.0]],
+            [[-8.0, -6.0], [-6.0, -6.0]],
+            [[-2.0, -6.0], [0.0, -6.0]],
+            [[6.0, -6.0], [10.0, -6.0]],
+            [[-12.0, -8.0], [-6.0, -8.0]],
+            [[-2.0, -8.0], [2.0, -8.0]],
+            [[4.0, -8.0], [6.0, -8.0]],
+            [[8.0, -8.0], [10.0, -8.0]],
+            [[-10.0, -10.0], [-8.0, -10.0]],
+            [[-4.0, -10.0], [4.0, -10.0]],
+            [[-12.0, -12.0], [12.0, -12.0]],
+        ]
+    )
 
     def __init__(self) -> None:
-        self.win = None
+        self.screen = None
+        self.isopen = True
+        self._all_pos = []
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, Dict]:
         new_pos = self.pos + action
@@ -135,22 +133,48 @@ class ContinuousMaze(gym.Env):
             if intersection is not False:
                 new_pos = self.pos
         self.pos = new_pos
+        self._all_pos.append(self.pos.copy())
+        # self.render()
         return self.pos.copy(), 0.0, False, {}
 
     def reset(self) -> np.ndarray:
         self.pos = np.zeros(2)
+        self._all_pos.append(self.pos.copy())
         return self.pos.copy()
 
-    def render(self, mode: str = "human") -> None:
-        if self.win is None:
+    def render(self, mode="human"):
+        screen_dim = 500
+
+        bound = 13
+        scale = screen_dim / (bound * 2)
+        offset = screen_dim // 2
+
+        if self.screen is None:
             pygame.init()
-            self.win = pygame.display.set_mode((500, 500))
-            self.win.fill(BLACK)
-        # Draw current agent position
-        center = to_pix(self.pos)
-        pygame.draw.circle(self.win, RED, center, radius=1)
-        # Draw walls
+            self.screen = pygame.display.set_mode((screen_dim, screen_dim))
+        self.surf = pygame.Surface((screen_dim, screen_dim))
+        self.surf.fill(BLACK)
+
+        for pos in self._all_pos:
+            x, y = pos * scale + offset
+            # pygame.draw.circle(win, RED, center, radius=1)
+            gfxdraw.filled_circle(self.surf, int(x), int(y), 1, RED)
         for wall in self.walls:
-            start_pos, end_pos = to_pix(wall[0]), to_pix(wall[1])
-            pygame.draw.line(self.win, WHITE, start_pos, end_pos, width=3)
-        pygame.display.update()
+            x1, y1 = wall[0] * scale + offset
+            x2, y2 = wall[1] * scale + offset
+            gfxdraw.line(self.surf, int(x1), int(y1), int(x2), int(y2), WHITE)
+
+        self.surf = pygame.transform.flip(self.surf, flip_x=False, flip_y=True)
+        self.screen.blit(self.surf, (0, 0))
+        if mode == "human":
+            pygame.display.flip()
+
+        if mode == "rgb_array":
+            return np.transpose(np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2))
+        else:
+            return self.isopen
+
+    def close(self):
+        if self.screen is not None:
+            pygame.quit()
+            self.isopen = False
