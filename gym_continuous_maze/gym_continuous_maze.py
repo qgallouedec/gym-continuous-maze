@@ -142,7 +142,7 @@ class ContinuousMaze(gym.Env):
         self._all_pos.append(self.pos.copy())
         return self.pos.copy()
 
-    def render(self, mode="human"):
+    def render(self, mode: str = "human"):
         screen_dim = 500
 
         bound = 13
