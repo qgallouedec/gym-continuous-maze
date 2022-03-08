@@ -30,7 +30,7 @@ def get_intersect(A: np.ndarray, B: np.ndarray, C: np.ndarray, D: np.ndarray) ->
         t2 = ((B[0] - A[0]) * (C[1] - A[1]) - (C[0] - A[0]) * (B[1] - A[1])) / det
         if t1 > 1 or t1 < 0 or t2 > 1 or t2 < 0:
             # not intersect
-            return False
+            return None
         else:
             xi = A[0] + t1 * (B[0] - A[0])
             yi = A[1] + t1 * (B[1] - A[1])
