@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, Union
+from typing import Dict, Optional, Tuple
 
 import gym
 import numpy as np
@@ -11,7 +11,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 
-def get_intersect(A: np.ndarray, B: np.ndarray, C: np.ndarray, D: np.ndarray) -> Union[bool, np.ndarray]:
+def get_intersect(A: np.ndarray, B: np.ndarray, C: np.ndarray, D: np.ndarray) -> Optional[np.ndarray]:
     """
     Get the intersection of [A, B] and [C, D]. Return False if segment don't cross.
 
@@ -19,7 +19,7 @@ def get_intersect(A: np.ndarray, B: np.ndarray, C: np.ndarray, D: np.ndarray) ->
     :param B: Point of the first segment
     :param C: Point of the second segment
     :param D: Point of the second segment
-    :return: The intersection if any
+    :return: The intersection if any, otherwise None.
     """
     det = (B[0] - A[0]) * (C[1] - D[1]) - (C[0] - D[0]) * (B[1] - A[1])
     if det == 0:
@@ -41,7 +41,7 @@ class ContinuousMaze(gym.Env):
     """Continuous maze environment."""
 
     action_space = spaces.Box(-1, 1, (2,))
-    observation_space = spaces.Box(-10, 10, (2,))
+    observation_space = spaces.Box(-12, 12, (2,))
 
     walls = np.array(
         [
@@ -124,27 +124,25 @@ class ContinuousMaze(gym.Env):
     def __init__(self) -> None:
         self.screen = None
         self.isopen = True
-        self._all_pos = []
+        self.all_pos = []
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, Dict]:
         new_pos = self.pos + action
         for wall in self.walls:
             intersection = get_intersect(wall[0], wall[1], self.pos, new_pos)
-            if intersection is not False:
+            if intersection is not None:
                 new_pos = self.pos
         self.pos = new_pos
-        self._all_pos.append(self.pos.copy())
-        # self.render()
+        self.all_pos.append(self.pos.copy())
         return self.pos.copy(), 0.0, False, {}
 
     def reset(self) -> np.ndarray:
         self.pos = np.zeros(2)
-        self._all_pos.append(self.pos.copy())
+        self.all_pos.append(self.pos.copy())
         return self.pos.copy()
 
     def render(self, mode: str = "human"):
         screen_dim = 500
-
         bound = 13
         scale = screen_dim / (bound * 2)
         offset = screen_dim // 2
@@ -154,11 +152,10 @@ class ContinuousMaze(gym.Env):
             self.screen = pygame.display.set_mode((screen_dim, screen_dim))
         self.surf = pygame.Surface((screen_dim, screen_dim))
         self.surf.fill(BLACK)
-
-        for pos in self._all_pos:
+        for pos in self.all_pos:
             x, y = pos * scale + offset
-            # pygame.draw.circle(win, RED, center, radius=1)
             gfxdraw.filled_circle(self.surf, int(x), int(y), 1, RED)
+
         for wall in self.walls:
             x1, y1 = wall[0] * scale + offset
             x2, y2 = wall[1] * scale + offset
@@ -168,8 +165,7 @@ class ContinuousMaze(gym.Env):
         self.screen.blit(self.surf, (0, 0))
         if mode == "human":
             pygame.display.flip()
-
-        if mode == "rgb_array":
+        elif mode == "rgb_array":
             return np.transpose(np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2))
         else:
             return self.isopen
