@@ -24,7 +24,7 @@ def get_intersect(A: np.ndarray, B: np.ndarray, C: np.ndarray, D: np.ndarray) ->
     det = (B[0] - A[0]) * (C[1] - D[1]) - (C[0] - D[0]) * (B[1] - A[1])
     if det == 0:
         # Parallel
-        return False
+        return None
     else:
         t1 = ((C[0] - A[0]) * (C[1] - D[1]) - (C[0] - D[0]) * (C[1] - A[1])) / det
         t2 = ((B[0] - A[0]) * (C[1] - A[1]) - (C[0] - A[0]) * (B[1] - A[1])) / det
