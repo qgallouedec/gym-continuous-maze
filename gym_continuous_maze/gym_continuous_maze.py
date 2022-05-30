@@ -149,6 +149,13 @@ class ContinuousMaze(gym.Env):
 
         if self.screen is None:
             pygame.init()
+            try:
+                pygame.display.list_modes()
+            except:
+                import os
+
+                os.environ["SDL_VIDEODRIVER"] = "dummy"
+
             self.screen = pygame.display.set_mode((screen_dim, screen_dim))
         self.surf = pygame.Surface((screen_dim, screen_dim))
         self.surf.fill(BLACK)
